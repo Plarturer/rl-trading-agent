@@ -70,6 +70,48 @@ class DQNAgent:
         self.model.save_weights(name)
         logging.info(f"Model weights saved to {name}")
 
+class TradingEnvironment:
+    def __init__(self, data, window_size):
+        self.data = data
+        self.window_size = window_size
+        self.current_step = window_size
+        self.stock_price = self.data["Close"].values
+        self.n_stock = 0
+        self.balance = 10000 # Starting balance
+        logging.info("Trading environment initialized.")
+
+    def _get_state(self):
+        state = self.stock_price[self.current_step - self.window_size : self.current_step]
+        return np.array(state)
+
+    def reset(self):
+        self.current_step = self.window_size
+        self.n_stock = 0
+        self.balance = 10000
+        return self._get_state()
+
+    def step(self, action):
+        # Action: 0=hold, 1=buy, 2=sell
+        reward = 0
+        self.current_step += 1
+        if self.current_step > len(self.stock_price) - 1:
+            return self._get_state(), reward, True, {}
+
+        if action == 1: # Buy
+            if self.balance >= self.stock_price[self.current_step]:
+                self.n_stock += 1
+                self.balance -= self.stock_price[self.current_step]
+                logging.debug(f"Bought 1 stock at {self.stock_price[self.current_step]}")
+        elif action == 2: # Sell
+            if self.n_stock > 0:
+                self.n_stock -= 1
+                self.balance += self.stock_price[self.current_step]
+                reward = 1 # Simple reward for selling
+                logging.debug(f"Sold 1 stock at {self.stock_price[self.current_step]}")
+        
+        done = self.current_step == len(self.stock_price) - 1
+        return self._get_state(), reward, done, {}
 
 
-print("Initial DQN Agent class defined.")
+
+print("DQN Agent and Trading Environment defined.")
