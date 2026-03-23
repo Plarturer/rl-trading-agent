@@ -1,2 +1,10 @@
-# rl-trading-agent
-A Reinforcement Learning agent for algorithmic trading in financial markets using Deep Q-Networks (DQN).
+# RL Trading Agent
+
+![Platform](https://img.shields.io/badge/platform-linux-lightgrey)
+
+Autonomous trading agent using deep reinforcement learning for optimal portfolio management.
+
+## Features
+- DQN and PPO implementations.
+- Custom environment for stock market simulation.
+- Backtesting module with performance metrics.
