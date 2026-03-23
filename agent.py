@@ -112,6 +112,29 @@ class TradingEnvironment:
         done = self.current_step == len(self.stock_price) - 1
         return self._get_state(), reward, done, {}
 
+if __name__ == "__main__":
+    # Dummy data for demonstration
+    dummy_data = pd.DataFrame({
+        "Close": np.random.rand(100) * 100 + 50
+    })
+    env = TradingEnvironment(dummy_data, window_size=10)
+    state_size = env.window_size
+    action_size = 3 # hold, buy, sell
+    agent = DQNAgent(state_size, action_size)
 
+    episodes = 10
+    batch_size = 32
 
-print("DQN Agent and Trading Environment defined.")
+    for e in range(episodes):
+        state = env.reset()
+        for time in range(1000): # Max steps per episode
+            action = agent.act(state)
+            next_state, reward, done, _ = env.step(action)
+            agent.remember(state, action, reward, next_state, done)
+            state = next_state
+            if done:
+                logging.info(f"Episode {e}/{episodes} finished after {time} timesteps. Final balance: {env.balance}")
+                break
+            if len(agent.memory) > batch_size:
+                agent.replay(batch_size)
+    logging.info("RL Trading Agent simulation complete.")
